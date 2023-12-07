@@ -49,3 +49,46 @@ func (r *ProductRepositoryMysql) FindAll() ([]*entity.Product, error) {
 
 	return products, nil
 }
+
+func (r *ProductRepositoryMysql) FindOne(id string) (*entity.Product, error) {
+	row, err := r.DB.Query("SELECT * from products where id=?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	var product entity.Product
+
+	for row.Next() {
+		err = row.Scan(&product.ID, &product.Name, &product.Price)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &product, nil
+}
+
+func (r *ProductRepositoryMysql) Delete(id string) error {
+	_, err := r.DB.Exec("DELETE FROM products WHERE id = ?", id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductRepositoryMysql) Update(product *entity.Product, id string) (*int64, error) {
+	result, err := r.DB.Exec("UPDATE products SET name = ?, price = ? WHERE id = ?", product.Name, product.Price, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	return &rowsAffected, nil
+}

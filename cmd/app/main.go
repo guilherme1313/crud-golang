@@ -23,12 +23,18 @@ func main() {
 	repository := repository.NewProductRepositoryMysql(db)
 	createProductUseCase := usecase.NewCreateProductUseCase(repository)
 	listProductsUseCase := usecase.NewListProductsUseCase(repository)
+	findOneProductUseCase := usecase.NewFindOneProductUseCase(repository)
+	deleteProductUseCase := usecase.NewDeleteProductUseCase(repository)
+	updateProductUseCase := usecase.NewUpdateProductUseCase(repository)
 
-	productsHadlers := web.NewProductHandlers(createProductUseCase, listProductsUseCase)
+	productsHadlers := web.NewProductHandlers(createProductUseCase, listProductsUseCase, findOneProductUseCase, deleteProductUseCase, updateProductUseCase)
 
 	r := chi.NewRouter()
 	r.Post("/products", productsHadlers.CreateProductHandlers)
 	r.Get("/products", productsHadlers.ListProductHandlers)
+	r.Get("/products/{id}", productsHadlers.FindOneProductHandlers)
+	r.Delete("/products/{id}", productsHadlers.DeleteProductHandlers)
+	r.Put("/products/{id}", productsHadlers.UpdateProductHandlers)
 
 	http.ListenAndServe(":3000", r)
 }
